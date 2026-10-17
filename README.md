@@ -8,7 +8,7 @@ Planshet terminali institut ichidagi noutbuk serveriga ulanadi. Administrator ta
 2. PowerShell 7’da `pwsh -ExecutionPolicy Bypass -File .\start-server.ps1` buyrug‘ini ishga tushiring. Birinchi marta Python/OpenCV muhiti va YOLO/SFace modellari yuklanadi.
 3. Noutbukda `https://127.0.0.1:8443/` manzilini ochib administrator yarating.
 4. **Planshet terminali → Yangi terminal** orqali terminal tokeni yarating.
-5. Planshetda `http://<noutbuk-LAN-IP>:8000/certificate` dan CA sertifikatini yuklab, ishonchli root CA sifatida o‘rnating.
+5. Planshetda `http://<noutbuk-LAN-IP>:8000/certificate` dan CA sertifikatini yuklab oling. O‘rnatishdan oldin uning SHA-256 izini noutbukda ko‘rsatilgan `https-ca-sha256.txt` bilan solishtiring, so‘ng ishonchli root CA sifatida o‘rnating.
 6. `https://<noutbuk-LAN-IP>:8443/terminal` manzilini ochib tokenni kiriting va brauzerning kamera ruxsatini bering.
 
 Planshet va noutbuk bir lokal tarmoqda bo‘lishi kerak. Server portlarini ngrok yoki ommaviy internetga ochmang.
@@ -50,4 +50,3 @@ Lokal kadr tahlili institut noutbukida bajariladi. Kamera tasviri HTTPS orqali l
 - Yuz taqqoslash aniqligi yorug‘lik, kamera burchagi va tasvir sifatiga bog‘liq. Moslik noaniq bo‘lsa, administrator qo‘lda yakunlaydi.
 - Xodim va tashrifchi yuzlarini o‘xshashlik asosida ajratish xatoga yo‘l qo‘yishi mumkin; shablonlarni to‘g‘ri kiritish muhim.
 - my.gov.uz integratsiyasi ruxsat berilgandan keyin alohida ulanadi.
-

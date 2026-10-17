@@ -1,0 +1,36 @@
+# Runtime records, visitor photos, face templates, tokens, and local secrets
+.tashrif-data/
+*.sqlite
+*.sqlite3
+*.db
+*.sqlite-shm
+*.sqlite-wal
+storage.key
+https-password.txt
+*.pfx
+*.key
+*.pem
+*.cer
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+
+# Downloaded models, Python environments, and dependencies
+ai-models/
+ai-venv/
+.venv/
+venv/
+node_modules/
+__pycache__/
+*.py[cod]
+
+# Logs and transient downloads
+*.log
+*.download
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/

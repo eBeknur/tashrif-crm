@@ -1,0 +1,1024 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f7f6">
+  <title>Institut CRM — Talabalar</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172b2b;
+      --muted: #71807e;
+      --line: #dfe7e5;
+      --line-soft: #ebf0ee;
+      --paper: #ffffff;
+      --canvas: #f5f7f6;
+      --nav: #153532;
+      --nav-soft: #214c46;
+      --green: #167365;
+      --green-dark: #115b50;
+      --green-pale: #e7f4f0;
+      --amber: #a96617;
+      --amber-pale: #fbf2e6;
+      --red: #a84242;
+      --red-pale: #faeceb;
+      --shadow: 0 16px 44px rgba(18, 49, 45, .08);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: var(--ink); background: var(--canvas); }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    .app { min-height: 100vh; display: grid; grid-template-columns: 252px minmax(0, 1fr); }
+    .sidebar {
+      background: var(--nav); color: #f0f7f4; min-height: 100vh; padding: 23px 15px 18px;
+      display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; padding: 2px 10px 24px; }
+    .brand-mark {
+      width: 40px; height: 40px; border-radius: 13px; display: grid; place-items: center;
+      color: #d7f7ed; background: linear-gradient(145deg, #2c8b77, #1e5c54);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.18);
+    }
+    .brand-mark svg { width: 23px; height: 23px; }
+    .brand-name { font-size: 14px; line-height: 1.15; font-weight: 750; letter-spacing: .02em; }
+    .brand-sub { color: #a9c3bd; font-size: 10px; margin-top: 5px; letter-spacing: .12em; text-transform: uppercase; }
+    .nav-label { color: #8ca9a3; font-size: 10px; font-weight: 700; letter-spacing: .13em; padding: 8px 12px 9px; text-transform: uppercase; }
+    .nav-list { display: grid; gap: 4px; }
+    .nav-item {
+      display: flex; gap: 12px; align-items: center; border: 0; width: 100%; text-align: left;
+      color: #c0d3ce; background: transparent; border-radius: 10px; padding: 11px 12px;
+      font-size: 13px; font-weight: 550; transition: .18s ease;
+    }
+    .nav-item svg { width: 17px; height: 17px; flex: 0 0 17px; opacity: .9; }
+    .nav-item:hover { color: #fff; background: rgba(255,255,255,.07); }
+    .nav-item.active { color: #fff; background: var(--nav-soft); box-shadow: inset 3px 0 #65c6a8; }
+    .nav-item.active svg { color: #88ddbf; }
+    .nav-count { margin-left: auto; color: #8ca9a3; font-size: 11px; }
+    .sidebar-bottom { margin-top: auto; }
+    .device-card {
+      border: 1px solid rgba(224,246,239,.13); border-radius: 12px; padding: 13px;
+      background: rgba(255,255,255,.045); margin: 12px 2px 14px;
+    }
+    .device-title { font-size: 11px; color: #c8dbd6; font-weight: 650; display: flex; gap: 8px; align-items: center; }
+    .device-title svg { width: 15px; height: 15px; color: #81d2b5; }
+    .device-status { display: flex; align-items: center; gap: 7px; margin-top: 12px; color: #a5bbb6; font-size: 11px; }
+    .device-status .dot { width: 7px; height: 7px; background: #e8b36e; border-radius: 50%; box-shadow: 0 0 0 3px rgba(232,179,110,.13); }
+    .profile {
+      display: flex; align-items: center; gap: 10px; border-top: 1px solid rgba(224,246,239,.12);
+      padding: 15px 8px 0;
+    }
+    .avatar { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; color: #21594e; background: #d8eee5; font-size: 11px; font-weight: 750; }
+    .profile-name { font-size: 12px; color: #f2f7f5; font-weight: 650; }
+    .profile-role { font-size: 10px; color: #9bb5ae; margin-top: 3px; }
+    .more { margin-left: auto; color: #9bb5ae; font-size: 18px; }
+    .main { min-width: 0; }
+    .topbar {
+      height: 70px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,.88);
+      display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 0 34px;
+      position: sticky; top: 0; z-index: 5; backdrop-filter: blur(12px);
+    }
+    .crumb { color: #84918f; font-size: 12px; display: flex; align-items: center; gap: 8px; }
+    .crumb strong { color: #354946; font-weight: 650; }
+    .top-actions { display: flex; align-items: center; gap: 12px; }
+    .local-badge {
+      display: flex; align-items: center; gap: 8px; border: 1px solid #dce9e5; background: #f8fbfa;
+      color: #48645e; border-radius: 8px; padding: 8px 10px; font-size: 11px; font-weight: 600;
+    }
+    .local-badge svg { width: 14px; height: 14px; color: #257b67; }
+    .icon-button { width: 35px; height: 35px; border: 1px solid var(--line); background: white; border-radius: 9px; display: grid; place-items: center; color: #64736f; position: relative; }
+    .icon-button svg { width: 16px; height: 16px; }
+    .icon-button .ping { width: 6px; height: 6px; border: 1px solid white; background: #d87761; border-radius: 50%; position: absolute; top: 7px; right: 7px; }
+    .content { max-width: 1500px; margin: 0 auto; padding: 30px 34px 42px; }
+    .heading-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; margin-bottom: 23px; }
+    .eyebrow { font-size: 11px; color: var(--green); font-weight: 750; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 8px; }
+    h1 { font-size: clamp(23px, 2.2vw, 30px); letter-spacing: -.045em; line-height: 1.1; margin: 0; font-weight: 760; }
+    .subhead { color: var(--muted); font-size: 13px; margin: 9px 0 0; }
+    .head-actions { display: flex; gap: 9px; flex-shrink: 0; }
+    .btn {
+      display: inline-flex; justify-content: center; align-items: center; gap: 8px;
+      padding: 10px 13px; border: 1px solid var(--line); border-radius: 8px; background: #fff;
+      color: #425550; font-size: 12px; font-weight: 650; transition: .16s ease;
+    }
+    .btn:hover { border-color: #b9d1ca; background: #f9fcfb; }
+    .btn svg { width: 15px; height: 15px; }
+    .btn-primary { background: var(--green); color: white; border-color: var(--green); box-shadow: 0 3px 8px rgba(22,115,101,.15); }
+    .btn-primary:hover { background: var(--green-dark); border-color: var(--green-dark); color: white; }
+    .metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 13px; margin-bottom: 21px; }
+    .metric {
+      min-width: 0; border: 1px solid var(--line); border-radius: 11px; background: var(--paper);
+      padding: 15px 16px; display: flex; align-items: center; justify-content: space-between; gap: 9px;
+    }
+    .metric-label { color: #798783; font-size: 11px; font-weight: 600; }
+    .metric-value { font-size: 22px; letter-spacing: -.04em; font-weight: 750; margin-top: 7px; }
+    .metric-note { color: #84928e; font-size: 10px; margin-top: 3px; }
+    .metric-icon { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; color: var(--green); background: var(--green-pale); flex-shrink: 0; }
+    .metric-icon svg { width: 17px; height: 17px; }
+    .metric-icon.amber { color: var(--amber); background: var(--amber-pale); }
+    .metric-icon.blue { color: #446c9d; background: #edf3fa; }
+    .metric-icon.gray { color: #677975; background: #eff3f1; }
+    .panel { border: 1px solid var(--line); background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 3px 14px rgba(22, 47, 44, .025); }
+    .panel-heading { padding: 16px 19px 13px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line-soft); }
+    .panel-title { font-size: 14px; font-weight: 720; letter-spacing: -.015em; }
+    .panel-subtitle { font-size: 11px; color: #83908d; margin-top: 4px; }
+    .sync-note { display: flex; align-items: center; gap: 6px; color: #7b8985; font-size: 10px; }
+    .sync-note .dot { width: 6px; height: 6px; background: #e7a64f; border-radius: 50%; }
+    .filter-bar { padding: 13px 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line-soft); }
+    .tabs { display: flex; align-items: center; gap: 4px; overflow-x: auto; }
+    .tab {
+      border: 0; color: #788682; background: transparent; border-radius: 7px; padding: 8px 10px;
+      font-size: 11px; white-space: nowrap; font-weight: 620;
+    }
+    .tab:hover { background: #f5f8f7; color: #3c5650; }
+    .tab.active { color: var(--green-dark); background: var(--green-pale); }
+    .tab-count { font-size: 10px; margin-left: 4px; opacity: .7; }
+    .filters { display: flex; align-items: center; gap: 8px; }
+    .search { position: relative; width: min(230px, 22vw); }
+    .search svg { width: 15px; height: 15px; position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #85918e; pointer-events: none; }
+    .search input, .select {
+      height: 34px; border: 1px solid var(--line); border-radius: 7px; outline: 0; background: #fff;
+      color: #354844; font-size: 11px;
+    }
+    .search input { width: 100%; padding: 0 10px 0 32px; }
+    .search input::placeholder { color: #9aa5a2; }
+    .search input:focus, .select:focus { border-color: #72b6a3; box-shadow: 0 0 0 3px rgba(56,143,121,.1); }
+    .select { padding: 0 29px 0 10px; max-width: 190px; }
+    .table-wrap { width: 100%; overflow: auto; }
+    table { border-collapse: separate; border-spacing: 0; min-width: 980px; width: 100%; font-size: 11px; }
+    thead th {
+      background: #f7f9f8; color: #788581; text-align: left; font-size: 10px; font-weight: 700;
+      letter-spacing: .025em; padding: 11px 12px; border-bottom: 1px solid #d9e3df; border-right: 1px solid #e7edeb;
+      white-space: nowrap; height: 39px;
+    }
+    thead th:first-child { border-left: 0; }
+    thead th:last-child { border-right: 0; }
+    tbody td {
+      height: 55px; padding: 8px 12px; color: #42534f; border-bottom: 1px solid #e8eeec;
+      border-right: 1px solid #edf1ef; vertical-align: middle; background: #fff;
+    }
+    tbody tr:last-child td { border-bottom: 0; }
+    tbody td:last-child { border-right: 0; }
+    tbody tr { transition: background .12s ease; }
+    tbody tr:hover td { background: #f8fbfa; }
+    .check-col { width: 38px; text-align: center !important; padding-left: 10px !important; padding-right: 10px !important; }
+    input[type="checkbox"] { accent-color: var(--green); width: 14px; height: 14px; vertical-align: middle; cursor: pointer; }
+    .sortable { cursor: pointer; user-select: none; }
+    .sortable:hover { color: #365d53; }
+    .sort-mark { margin-left: 4px; color: #a6b1ad; font-size: 10px; }
+    .student-cell { display: flex; align-items: center; gap: 9px; min-width: 195px; }
+    .student-avatar { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; flex: 0 0 30px; color: #367064; background: #e8f2ee; font-size: 10px; font-weight: 750; }
+    .student-name { color: #263c37; font-size: 11px; font-weight: 700; white-space: nowrap; }
+    .student-meta { color: #909b98; font-size: 9px; margin-top: 3px; }
+    .id-code { color: #64736f; font-variant-numeric: tabular-nums; font-size: 10px; }
+    .faculty { white-space: nowrap; }
+    .group-chip { color: #526760; background: #f0f4f2; border-radius: 5px; padding: 4px 6px; font-size: 10px; white-space: nowrap; }
+    .time { font-variant-numeric: tabular-nums; color: #4b605a; font-weight: 600; white-space: nowrap; }
+    .time.empty { color: #a8b1ae; font-weight: 450; }
+    .status { display: inline-flex; align-items: center; gap: 6px; border-radius: 99px; padding: 5px 8px; white-space: nowrap; font-size: 9px; font-weight: 700; }
+    .status:before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+    .status.in { color: #20725f; background: #e8f5ef; }
+    .status.out { color: #4c6790; background: #edf2fa; }
+    .status.absent { color: #9a651f; background: #fbf3e8; }
+    .row-more { border: 0; background: transparent; color: #91a09b; font-size: 18px; line-height: 1; border-radius: 5px; padding: 3px 7px; }
+    .row-more:hover { background: #eef4f1; color: #43645b; }
+    .table-footer { min-height: 50px; border-top: 1px solid var(--line-soft); padding: 10px 17px; display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #82908c; font-size: 10px; }
+    .pagination { display: flex; align-items: center; gap: 4px; }
+    .page-btn { height: 27px; min-width: 27px; border: 1px solid transparent; color: #72817c; background: transparent; border-radius: 6px; font-size: 10px; }
+    .page-btn:hover { background: #f4f8f6; border-color: var(--line); }
+    .page-btn.current { color: #fff; background: var(--green); border-color: var(--green); }
+    .page-btn:disabled { opacity: .4; cursor: default; }
+    .selected-bar { display: none; align-items: center; gap: 10px; color: #4e655f; font-size: 11px; padding: 9px 18px; background: #f1f8f5; border-bottom: 1px solid #e0eee8; }
+    .selected-bar.show { display: flex; }
+    .selected-bar button { background: transparent; color: var(--green-dark); border: 0; font-size: 10px; font-weight: 700; }
+    .toast {
+      position: fixed; right: 22px; bottom: 22px; z-index: 30; background: #183d37; color: white;
+      padding: 11px 15px; border-radius: 9px; font-size: 12px; box-shadow: var(--shadow);
+      opacity: 0; transform: translateY(10px); transition: .2s ease; pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .modal-backdrop { display: none; position: fixed; inset: 0; z-index: 20; background: rgba(10, 28, 26, .36); align-items: center; justify-content: center; padding: 18px; }
+    .modal-backdrop.show { display: flex; }
+    .modal { width: min(520px, 100%); border-radius: 14px; background: white; box-shadow: 0 24px 70px rgba(13,41,36,.2); overflow: hidden; animation: rise .18s ease; }
+    @keyframes rise { from { opacity: .7; transform: translateY(7px) scale(.99); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    .modal-head { padding: 19px 21px; border-bottom: 1px solid var(--line-soft); display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .modal-head h2 { margin: 0; font-size: 17px; letter-spacing: -.025em; }
+    .modal-head p { margin: 5px 0 0; font-size: 11px; color: var(--muted); }
+    .close-btn { border: 0; background: #f2f6f4; color: #6e7c77; width: 28px; height: 28px; border-radius: 7px; font-size: 17px; }
+    .modal-body { padding: 19px 21px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+    .field { display: grid; gap: 6px; }
+    .field.full { grid-column: 1 / -1; }
+    .field label { color: #60716b; font-size: 10px; font-weight: 700; }
+    .field input, .field select { width: 100%; height: 38px; border: 1px solid var(--line); border-radius: 7px; padding: 0 10px; font-size: 12px; color: #344641; outline: 0; background: white; }
+    .field input:focus, .field select:focus { border-color: #72b6a3; box-shadow: 0 0 0 3px rgba(56,143,121,.1); }
+    .modal-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 14px 21px; border-top: 1px solid var(--line-soft); background: #fbfcfc; }
+    .detail-list { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; }
+    .detail-item { padding: 12px; border-bottom: 1px solid var(--line-soft); }
+    .detail-item:nth-child(odd) { border-right: 1px solid var(--line-soft); }
+    .detail-item:nth-last-child(-n+2) { border-bottom: 0; }
+    .detail-label { color: #8b9894; font-size: 9px; text-transform: uppercase; letter-spacing: .06em; font-weight: 700; }
+    .detail-value { color: #2e4540; font-size: 12px; font-weight: 650; margin-top: 5px; }
+    .empty-state { padding: 36px 18px; text-align: center; color: #8a9894; font-size: 12px; }
+    .footer-note { padding: 15px 2px 0; color: #9aa5a1; font-size: 10px; display: flex; justify-content: space-between; gap: 10px; }
+    .page-intro { display:flex; justify-content:space-between; align-items:flex-end; gap:18px; margin-bottom:20px; }
+    .page-intro h1 { margin:0; }
+    .page-intro p { margin:8px 0 0; color:var(--muted); font-size:12px; }
+    .page-grid { display:grid; grid-template-columns:minmax(0,1.45fr) minmax(280px,.9fr); gap:15px; margin-bottom:15px; }
+    .page-grid.equal { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .page-card { border:1px solid var(--line); border-radius:12px; background:white; padding:17px; }
+    .page-card-title { font-size:13px; font-weight:720; margin-bottom:4px; }
+    .page-card-subtitle { color:#84918e; font-size:10px; }
+    .overview-banner { border-radius:13px; padding:20px 22px; margin-bottom:15px; color:#f1faf6; background:linear-gradient(112deg,#194b43,#236f5e 68%,#31856c); display:flex; align-items:center; justify-content:space-between; gap:16px; overflow:hidden; position:relative; }
+    .overview-banner:after { content:""; position:absolute; width:210px; height:210px; border:1px solid rgba(255,255,255,.13); border-radius:50%; right:42px; top:-116px; box-shadow:0 0 0 28px rgba(255,255,255,.035),0 0 0 58px rgba(255,255,255,.025); }
+    .overview-banner h2 { font-size:17px; margin:0; letter-spacing:-.025em; position:relative; z-index:1; }
+    .overview-banner p { margin:7px 0 0; color:#c2ddd4; font-size:11px; position:relative; z-index:1; }
+    .banner-date { position:relative; z-index:1; color:#e0f0ea; font-size:11px; white-space:nowrap; }
+    .chart-bars { display:grid; gap:12px; margin-top:17px; }
+    .chart-row { display:grid; grid-template-columns:120px minmax(50px,1fr) 34px; gap:10px; align-items:center; }
+    .chart-name { color:#5d706a; font-size:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .chart-track { height:8px; background:#edf2f0; border-radius:99px; overflow:hidden; }
+    .chart-fill { height:100%; background:linear-gradient(90deg,#3c9c80,#6bc7a1); border-radius:99px; }
+    .chart-value { color:#62726d; text-align:right; font-size:10px; font-weight:700; font-variant-numeric:tabular-nums; }
+    .activity-list { margin-top:12px; }
+    .activity-row { display:grid; grid-template-columns:28px minmax(0,1fr) auto; gap:9px; align-items:center; padding:10px 0; border-bottom:1px solid var(--line-soft); }
+    .activity-row:last-child { border-bottom:0; }
+    .activity-icon { width:26px; height:26px; border-radius:8px; display:grid; place-items:center; color:#217460; background:#eaf5f0; font-size:13px; font-weight:800; }
+    .activity-icon.exit { color:#536f96; background:#eef3fa; }
+    .activity-name { color:#354b45; font-size:10px; font-weight:700; }
+    .activity-meta { color:#98a39f; font-size:9px; margin-top:3px; }
+    .activity-time { color:#526660; font-size:10px; font-weight:700; font-variant-numeric:tabular-nums; }
+    .quick-links { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
+    .quick-link { border:1px solid #e2ebe7; color:#3e6258; background:#f7fbf9; border-radius:7px; padding:8px 10px; font-size:10px; font-weight:650; }
+    .quick-link:hover { border-color:#b5d3c9; background:#eef7f3; }
+    .section-toolbar { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:13px; }
+    .section-toolbar .search { width:min(300px,100%); }
+    .compact-table { min-width:760px; }
+    .group-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+    .group-card { border:1px solid var(--line); border-radius:11px; background:white; padding:15px; transition:.15s ease; }
+    .group-card:hover { border-color:#bad5cc; transform:translateY(-1px); box-shadow:0 8px 20px rgba(18,49,45,.05); }
+    .group-card-head { display:flex; justify-content:space-between; gap:10px; align-items:flex-start; }
+    .group-name { font-size:14px; font-weight:750; color:#2c4941; }
+    .group-faculty { color:#84918d; font-size:10px; margin-top:4px; }
+    .group-count { background:#edf5f1; color:#357260; border-radius:7px; padding:5px 7px; font-size:10px; font-weight:700; white-space:nowrap; }
+    .group-progress { height:6px; border-radius:99px; background:#edf1ef; margin:15px 0 8px; overflow:hidden; }
+    .group-progress span { display:block; height:100%; border-radius:inherit; background:#4ca787; }
+    .group-foot { display:flex; justify-content:space-between; color:#87938f; font-size:9px; }
+    .report-summary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-bottom:15px; }
+    .report-number { border:1px solid var(--line); border-radius:10px; background:white; padding:14px; }
+    .report-number span { display:block; color:#84918d; font-size:10px; }
+    .report-number strong { display:block; color:#2d4e44; font-size:20px; margin-top:7px; letter-spacing:-.04em; }
+    .week-chart { height:198px; display:flex; align-items:flex-end; gap:14px; padding:18px 8px 0; border-bottom:1px solid var(--line); margin-top:12px; }
+    .week-day { flex:1; display:flex; height:100%; flex-direction:column; justify-content:flex-end; align-items:center; gap:7px; }
+    .week-bar { width:min(33px,70%); min-height:12px; border-radius:6px 6px 2px 2px; background:linear-gradient(180deg,#69c2a1,#277d67); position:relative; }
+    .week-day span { color:#82908b; font-size:9px; }
+    .week-day b { color:#506760; font-size:9px; font-weight:650; }
+    .device-card-large { border:1px solid var(--line); background:white; border-radius:12px; padding:19px; }
+    .device-main { display:flex; gap:14px; align-items:flex-start; }
+    .device-illustration { width:54px; height:54px; border-radius:13px; display:grid; place-items:center; color:#266c5c; background:#eaf5f0; flex:0 0 54px; }
+    .device-illustration svg { width:27px; height:27px; }
+    .device-heading { font-size:14px; font-weight:740; color:#2c4540; }
+    .device-description { color:#85918d; font-size:10px; line-height:1.5; margin-top:5px; }
+    .device-status-pill { display:inline-flex; align-items:center; gap:6px; color:#9a641e; background:#fbf3e7; padding:6px 8px; border-radius:99px; font-size:9px; font-weight:700; margin-top:12px; }
+    .device-status-pill:before { content:""; width:5px; height:5px; border-radius:50%; background:currentColor; }
+    .device-details { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:20px; border-top:1px solid var(--line-soft); padding-top:15px; }
+    .device-detail span { display:block; color:#929d99; font-size:9px; }
+    .device-detail b { display:block; color:#536860; font-size:11px; margin-top:5px; font-weight:650; }
+    .settings-grid { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(260px,.8fr); gap:14px; }
+    .settings-form { display:grid; gap:14px; }
+    .settings-form .field input,.settings-form .field select { height:39px; }
+    .setting-row { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:12px 0; border-bottom:1px solid var(--line-soft); }
+    .setting-row:last-child { border-bottom:0; }
+    .setting-row strong { display:block; color:#465b55; font-size:11px; }
+    .setting-row small { display:block; color:#8b9894; font-size:9px; margin-top:4px; }
+    .switch { position:relative; display:inline-flex; width:34px; height:19px; flex:0 0 34px; }
+    .switch input { opacity:0; width:0; height:0; }
+    .switch span { position:absolute; inset:0; background:#d7e0dc; border-radius:99px; transition:.15s; cursor:pointer; }
+    .switch span:before { content:""; position:absolute; width:13px; height:13px; border-radius:50%; background:white; left:3px; top:3px; transition:.15s; box-shadow:0 1px 3px #0002; }
+    .switch input:checked + span { background:#32836c; }
+    .switch input:checked + span:before { transform:translateX(15px); }
+    .page-empty-note { color:#8a9692; font-size:10px; margin-top:13px; line-height:1.5; }
+    .content[hidden] { display:none !important; }
+
+    @media (max-width: 1080px) {
+      .app { grid-template-columns: 218px minmax(0, 1fr); }
+      .content { padding-left: 23px; padding-right: 23px; }
+      .topbar { padding: 0 23px; }
+      .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .filters { flex-wrap: wrap; justify-content: flex-end; }
+    }
+    @media (max-width: 760px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { position: fixed; z-index: 10; left: -260px; width: 252px; transition: left .2s ease; box-shadow: var(--shadow); }
+      .sidebar.open { left: 0; }
+      .topbar { height: 60px; padding: 0 15px; }
+      .top-actions { gap: 8px; }
+      .local-badge span { display: none; }
+      .menu-toggle { display: grid !important; }
+      .content { padding: 22px 14px 30px; }
+      .heading-row { align-items: flex-start; flex-direction: column; gap: 15px; }
+      .head-actions { width: 100%; }
+      .head-actions .btn { flex: 1; }
+      .metrics { gap: 8px; }
+      .metric { padding: 12px; }
+      .metric-value { font-size: 19px; }
+      .panel-heading { padding: 14px; }
+      .filter-bar { align-items: flex-start; flex-direction: column; padding: 10px 12px; }
+      .filters { width: 100%; justify-content: stretch; }
+      .search { width: auto; flex: 1; }
+      .select { max-width: 150px; }
+      .table-footer { flex-direction: column; align-items: flex-start; }
+      .footer-note { flex-direction: column; }
+      .page-grid, .page-grid.equal, .settings-grid { grid-template-columns:1fr; }
+      .group-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .report-summary { gap:7px; }
+      .report-number { padding:11px; }
+      .chart-row { grid-template-columns:94px minmax(40px,1fr) 28px; }
+    }
+    @media (max-width: 450px) { .group-grid { grid-template-columns:1fr; } .overview-banner { align-items:flex-start; flex-direction:column; } .report-summary { grid-template-columns:1fr; } }
+    @media (min-width: 761px) { .menu-toggle { display: none !important; } }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 18.5V7.7L12 4l8 3.7v10.8M8 18.5V9.8l4-1.9 4 1.9v8.7M2.8 20h18.4M12 12v2.8" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div><div class="brand-name">INSTITUT CRM</div><div class="brand-sub">Boshqaruv tizimi</div></div>
+      </div>
+
+      <div class="nav-label">Asosiy menyu</div>
+      <nav class="nav-list" aria-label="Asosiy menyu">
+        <button class="nav-item" data-section="Umumiy ko‘rinish" data-page="overview">
+          <svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/></svg>
+          Umumiy ko‘rinish
+        </button>
+        <button class="nav-item active" data-section="Talabalar" data-page="students">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3.2" stroke="currentColor" stroke-width="1.6"/><path d="M3.7 19c.4-3.1 2.4-4.8 5.3-4.8s4.9 1.7 5.3 4.8M16 5.4a3 3 0 0 1 0 5.7M16.6 14.5c2.1.5 3.4 2 3.7 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Talabalar <span class="nav-count" id="navStudentCount">12</span>
+        </button>
+        <button class="nav-item" data-section="Davomat jurnali" data-page="attendance">
+          <svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="5" width="17" height="15.5" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M7.5 3.5v3M16.5 3.5v3M3.5 9.5h17M7.3 13h3M7.3 16.5h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Davomat jurnali
+        </button>
+        <button class="nav-item" data-section="Guruhlar" data-page="groups">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 5.5h16M4 12h16M4 18.5h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="5.5" r="1.5" fill="currentColor"/><circle cx="15" cy="12" r="1.5" fill="currentColor"/><circle cx="10" cy="18.5" r="1.5" fill="currentColor"/></svg>
+          Guruhlar
+        </button>
+        <button class="nav-item" data-section="Hisobotlar" data-page="reports">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 20V11M10 20V4M16 20v-7M22 20V8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          Hisobotlar
+        </button>
+      </nav>
+
+      <div class="nav-label" style="margin-top:23px">Tizim</div>
+      <nav class="nav-list" aria-label="Tizim menyusi">
+        <button class="nav-item" data-section="Qurilmalar" data-page="devices">
+          <svg viewBox="0 0 24 24" fill="none"><rect x="5.5" y="2.8" width="13" height="18.4" rx="2.3" stroke="currentColor" stroke-width="1.6"/><path d="M9 6.5h6M9 17.2h6M12 11.5v2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Qurilmalar
+        </button>
+        <button class="nav-item" data-section="Sozlamalar" data-page="settings">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/><path d="m19.4 15 .1.1a1.8 1.8 0 1 1-2.5 2.5l-.1-.1a1.8 1.8 0 0 0-3.1 1.3v.2a1.8 1.8 0 1 1-3.6 0v-.2a1.8 1.8 0 0 0-3.1-1.3l-.1.1a1.8 1.8 0 1 1-2.5-2.5l.1-.1a1.8 1.8 0 0 0-1.3-3.1h-.2a1.8 1.8 0 1 1 0-3.6h.2a1.8 1.8 0 0 0 1.3-3.1l-.1-.1a1.8 1.8 0 1 1 2.5-2.5l.1.1a1.8 1.8 0 0 0 3.1-1.3v-.2a1.8 1.8 0 1 1 3.6 0v.2a1.8 1.8 0 0 0 3.1 1.3l.1-.1a1.8 1.8 0 1 1 2.5 2.5l-.1.1a1.8 1.8 0 0 0 1.3 3.1h.2a1.8 1.8 0 1 1 0 3.6h-.2a1.8 1.8 0 0 0-1.3 3.1Z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/></svg>
+          Sozlamalar
+        </button>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <div class="device-card">
+          <div class="device-title">
+            <svg viewBox="0 0 24 24" fill="none"><rect x="5.5" y="2.8" width="13" height="18.4" rx="2.3" stroke="currentColor" stroke-width="1.6"/><path d="M9 6.5h6M9 17.2h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            Hikvision qurilmasi
+          </div>
+          <div class="device-status"><span class="dot"></span> Sinov rejimi · ulanmagan</div>
+        </div>
+        <div class="profile">
+          <div class="avatar">AD</div>
+          <div><div class="profile-name">Administrator</div><div class="profile-role">Tizim boshqaruvchisi</div></div>
+          <div class="more" aria-hidden="true">···</div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="crumb"><button class="icon-button menu-toggle" id="menuToggle" aria-label="Menyuni ochish"><svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button><span>Institut</span><span>›</span><strong>Talabalar</strong></div>
+        <div class="top-actions">
+          <div class="local-badge">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M4 8.5a12.6 12.6 0 0 1 16 0M7 11.7a7.7 7.7 0 0 1 10 0M10 15a3 3 0 0 1 4 0M12 19h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            <span>Mahalliy tarmoq</span>
+          </div>
+          <button class="icon-button" id="helpButton" aria-label="Yordam"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M9.7 9a2.4 2.4 0 1 1 4.1 1.7c-1.2 1.1-1.8 1.4-1.8 2.8M12 17h.01" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+          <button class="icon-button" id="notificationButton" aria-label="Bildirishnomalar"><svg viewBox="0 0 24 24" fill="none"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="ping"></span></button>
+        </div>
+      </header>
+
+      <section class="content" id="studentsContent">
+        <div class="heading-row">
+          <div>
+            <div class="eyebrow">Talabalar bazasi</div>
+            <h1>Talabalar reyestri</h1>
+            <p class="subhead">Talabalar ro‘yxati va bugungi kirish-chiqish holati bir sahifada.</p>
+          </div>
+          <div class="head-actions">
+            <button class="btn" id="exportButton">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v11M8 10l4 4 4-4M5 17v3h14v-3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              CSV eksport
+            </button>
+            <button class="btn btn-primary" id="addButton">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              Talaba qo‘shish
+            </button>
+          </div>
+        </div>
+
+        <div class="metrics" aria-label="Bugungi ko‘rsatkichlar">
+          <div class="metric">
+            <div><div class="metric-label">Jami talabalar</div><div class="metric-value" id="totalMetric">12</div><div class="metric-note">Reyestrda</div></div>
+            <div class="metric-icon gray"><svg viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3.2" stroke="currentColor" stroke-width="1.7"/><path d="M3.7 19c.4-3.1 2.4-4.8 5.3-4.8s4.9 1.7 5.3 4.8M16 5.4a3 3 0 0 1 0 5.7M16.6 14.5c2.1.5 3.4 2 3.7 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+          </div>
+          <div class="metric">
+            <div><div class="metric-label">Bugun kelgan</div><div class="metric-value" id="arrivedMetric">8</div><div class="metric-note">Kirish qaydi bor</div></div>
+            <div class="metric-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5 9.2 17 20 6.8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+          <div class="metric">
+            <div><div class="metric-label">Hozir institutda</div><div class="metric-value" id="insideMetric">4</div><div class="metric-note">Kirish qaydi faol</div></div>
+            <div class="metric-icon blue"><svg viewBox="0 0 24 24" fill="none"><path d="M4 20V5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5V20M2.5 20h19M9 20v-5h6v5M9 8h.01M15 8h.01M9 11h.01M15 11h.01" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+          <div class="metric">
+            <div><div class="metric-label">Kelmagan</div><div class="metric-value" id="absentMetric">4</div><div class="metric-note">Hozircha qayd yo‘q</div></div>
+            <div class="metric-icon amber"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></div>
+          </div>
+        </div>
+
+        <section class="panel" aria-label="Talabalar jadvali">
+          <div class="panel-heading">
+            <div><div class="panel-title">Talabalar ro‘yxati</div><div class="panel-subtitle"><span id="todayLabel"></span> · Davomat ma’lumotlari</div></div>
+            <div class="sync-note"><span class="dot"></span> Demo ma’lumotlar · Hikvision ulanmagan</div>
+          </div>
+          <div class="filter-bar">
+            <div class="tabs" role="tablist" aria-label="Holat bo‘yicha filtrlash">
+              <button class="tab active" data-filter="all" role="tab">Barchasi <span class="tab-count" id="allCount">12</span></button>
+              <button class="tab" data-filter="inside" role="tab">Institutda <span class="tab-count" id="insideCount">4</span></button>
+              <button class="tab" data-filter="left" role="tab">Chiqib ketgan <span class="tab-count" id="leftCount">4</span></button>
+              <button class="tab" data-filter="absent" role="tab">Kelmagan <span class="tab-count" id="absentCount">4</span></button>
+            </div>
+            <div class="filters">
+              <label class="search">
+                <svg viewBox="0 0 24 24" fill="none"><circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.7"/><path d="m16 16 4.3 4.3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+                <input id="searchInput" type="search" placeholder="Ism, ID yoki guruh..." aria-label="Talabalarni qidirish">
+              </label>
+              <select class="select" id="facultyFilter" aria-label="Fakultet bo‘yicha filtrlash">
+                <option value="">Barcha fakultetlar</option>
+              </select>
+            </div>
+          </div>
+          <div class="selected-bar" id="selectedBar">
+            <span id="selectedText">0 ta talaba tanlandi</span>
+            <button id="exportSelected">Tanlanganlarni eksport qilish</button>
+            <button id="clearSelection">Tanlovni bekor qilish</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th class="check-col"><input id="selectAll" type="checkbox" aria-label="Sahifadagi barchasini tanlash"></th>
+                  <th class="sortable" data-sort="name">Talaba <span class="sort-mark">↕</span></th>
+                  <th class="sortable" data-sort="id">Talaba IDsi <span class="sort-mark">↕</span></th>
+                  <th class="sortable" data-sort="faculty">Fakultet <span class="sort-mark">↕</span></th>
+                  <th class="sortable" data-sort="group">Guruh <span class="sort-mark">↕</span></th>
+                  <th class="sortable" data-sort="entry">Kirish vaqti <span class="sort-mark">↕</span></th>
+                  <th class="sortable" data-sort="exit">Chiqish vaqti <span class="sort-mark">↕</span></th>
+                  <th class="sortable" data-sort="status">Holati <span class="sort-mark">↕</span></th>
+                  <th aria-label="Amallar"></th>
+                </tr>
+              </thead>
+              <tbody id="studentRows"></tbody>
+            </table>
+          </div>
+          <div class="table-footer">
+            <div id="rangeLabel">1–12 dan 12 ta talaba</div>
+            <div class="pagination" id="pagination"></div>
+          </div>
+        </section>
+        <div class="footer-note"><span>Institut CRM · Mahalliy tarmoqda ishlash uchun prototip</span><span>Ma’lumotlar shu namoyish uchun yaratilgan</span></div>
+      </section>
+      <section class="content" id="otherPages" style="display:none"></section>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <div class="modal-head">
+        <div><h2 id="modalTitle">Talaba qo‘shish</h2><p id="modalSubtitle">Talabaning asosiy ma’lumotlarini kiriting.</p></div>
+        <button class="close-btn" id="closeModal" aria-label="Yopish">×</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-foot" id="modalFoot"></div>
+    </div>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const students = [
+      { name: "Diyor Ismoilov", id: "240105", faculty: "Axborot texnologiyalari", group: "AT-23-1", entry: "08:14", exit: "", status: "inside" },
+      { name: "Madina Rahimova", id: "240217", faculty: "Iqtisodiyot", group: "IQ-22-3", entry: "08:22", exit: "13:46", status: "left" },
+      { name: "Sardor Jo‘rayev", id: "240389", faculty: "Muhandislik", group: "MX-23-2", entry: "08:47", exit: "", status: "inside" },
+      { name: "Nilufar Karimova", id: "240412", faculty: "Axborot texnologiyalari", group: "AT-24-1", entry: "", exit: "", status: "absent" },
+      { name: "Behruz Abduqodirov", id: "230561", faculty: "Yuridik", group: "YU-22-2", entry: "09:01", exit: "16:58", status: "left" },
+      { name: "Shaxnoza Ubaydullayeva", id: "240683", faculty: "Tibbiyot", group: "TB-23-1", entry: "07:56", exit: "", status: "inside" },
+      { name: "Azizbek Umarov", id: "240721", faculty: "Iqtisodiyot", group: "IQ-24-2", entry: "", exit: "", status: "absent" },
+      { name: "Mohinur Xolmatova", id: "240744", faculty: "Muhandislik", group: "MX-22-1", entry: "08:33", exit: "12:05", status: "left" },
+      { name: "Eldor Qodirov", id: "230892", faculty: "Axborot texnologiyalari", group: "AT-22-2", entry: "09:12", exit: "", status: "inside" },
+      { name: "Zilola Tursunova", id: "240918", faculty: "Tibbiyot", group: "TB-24-1", entry: "08:05", exit: "11:54", status: "left" },
+      { name: "Javohir Sodiqov", id: "231044", faculty: "Yuridik", group: "YU-23-1", entry: "", exit: "", status: "absent" },
+      { name: "Malika Ergasheva", id: "241108", faculty: "Muhandislik", group: "MX-24-1", entry: "", exit: "", status: "absent" }
+    ];
+    const state = { filter: "all", query: "", faculty: "", sort: "name", direction: 1, page: 1, pageSize: 8, selected: new Set() };
+    const statusText = { inside: "Institutda", left: "Chiqib ketgan", absent: "Kelmagan" };
+    const initials = (name) => name.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
+    const escapeHtml = (value) => String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
+    const dateString = new Intl.DateTimeFormat("uz-UZ", { timeZone: "Asia/Tashkent", day: "numeric", month: "long", year: "numeric" }).format(new Date());
+    document.getElementById("todayLabel").textContent = dateString;
+    const facultySelect = document.getElementById("facultyFilter");
+    [...new Set(students.map((student) => student.faculty))].sort().forEach((faculty) => {
+      const option = document.createElement("option");
+      option.value = faculty;
+      option.textContent = faculty;
+      facultySelect.append(option);
+    });
+
+    function counts() {
+      return {
+        all: students.length,
+        inside: students.filter((student) => student.status === "inside").length,
+        left: students.filter((student) => student.status === "left").length,
+        absent: students.filter((student) => student.status === "absent").length
+      };
+    }
+    function renderCounts() {
+      const values = counts();
+      document.getElementById("totalMetric").textContent = values.all;
+      document.getElementById("arrivedMetric").textContent = values.inside + values.left;
+      document.getElementById("insideMetric").textContent = values.inside;
+      document.getElementById("absentMetric").textContent = values.absent;
+      document.getElementById("navStudentCount").textContent = values.all;
+      document.getElementById("allCount").textContent = values.all;
+      document.getElementById("insideCount").textContent = values.inside;
+      document.getElementById("leftCount").textContent = values.left;
+      document.getElementById("absentCount").textContent = values.absent;
+    }
+    function getFiltered() {
+      const q = state.query.trim().toLocaleLowerCase("uz");
+      const rows = students.filter((student) => {
+        const matchesStatus = state.filter === "all" || student.status === state.filter;
+        const matchesFaculty = !state.faculty || student.faculty === state.faculty;
+        const text = [student.name, student.id, student.faculty, student.group].join(" ").toLocaleLowerCase("uz");
+        return matchesStatus && matchesFaculty && (!q || text.includes(q));
+      });
+      rows.sort((a, b) => {
+        const left = a[state.sort] || "";
+        const right = b[state.sort] || "";
+        return String(left).localeCompare(String(right), "uz", { numeric: true }) * state.direction;
+      });
+      return rows;
+    }
+    function render() {
+      renderCounts();
+      const rows = getFiltered();
+      const pageCount = Math.max(1, Math.ceil(rows.length / state.pageSize));
+      if (state.page > pageCount) state.page = pageCount;
+      const start = (state.page - 1) * state.pageSize;
+      const pageRows = rows.slice(start, start + state.pageSize);
+      const tbody = document.getElementById("studentRows");
+      tbody.innerHTML = "";
+      if (!pageRows.length) {
+        tbody.innerHTML = '<tr><td colspan="9"><div class="empty-state">Qidiruv bo‘yicha talaba topilmadi.</div></td></tr>';
+      } else {
+        pageRows.forEach((student) => {
+          const tr = document.createElement("tr");
+          const checked = state.selected.has(student.id) ? "checked" : "";
+          const entryClass = student.entry ? "time" : "time empty";
+          const exitClass = student.exit ? "time" : "time empty";
+          tr.innerHTML =
+            '<td class="check-col"><input type="checkbox" class="row-check" data-id="' + escapeHtml(student.id) + '" ' + checked + ' aria-label="' + escapeHtml(student.name) + 'ni tanlash"></td>' +
+            '<td><div class="student-cell"><div class="student-avatar">' + escapeHtml(initials(student.name)) + '</div><div><div class="student-name">' + escapeHtml(student.name) + '</div><div class="student-meta">Talaba · ' + escapeHtml(student.group) + '</div></div></div></td>' +
+            '<td><span class="id-code">' + escapeHtml(student.id) + '</span></td>' +
+            '<td class="faculty">' + escapeHtml(student.faculty) + '</td>' +
+            '<td><span class="group-chip">' + escapeHtml(student.group) + '</span></td>' +
+            '<td><span class="' + entryClass + '">' + escapeHtml(student.entry || "—") + '</span></td>' +
+            '<td><span class="' + exitClass + '">' + escapeHtml(student.exit || "—") + '</span></td>' +
+            '<td><span class="status ' + student.status + '">' + statusText[student.status] + '</span></td>' +
+            '<td><button class="row-more" data-open="' + escapeHtml(student.id) + '" aria-label="' + escapeHtml(student.name) + ' ma’lumotlari">···</button></td>';
+          tr.addEventListener("click", (event) => {
+            if (event.target.closest("button, input")) return;
+            openDetails(student.id);
+          });
+          tbody.append(tr);
+        });
+      }
+      const visibleStart = rows.length ? start + 1 : 0;
+      const visibleEnd = Math.min(start + state.pageSize, rows.length);
+      document.getElementById("rangeLabel").textContent = visibleStart + "–" + visibleEnd + " dan " + rows.length + " ta talaba";
+      renderPagination(pageCount);
+      updateSelection();
+      document.querySelectorAll(".row-check").forEach((box) => box.addEventListener("change", () => {
+        if (box.checked) state.selected.add(box.dataset.id); else state.selected.delete(box.dataset.id);
+        updateSelection();
+      }));
+      document.querySelectorAll("[data-open]").forEach((button) => button.addEventListener("click", () => openDetails(button.dataset.open)));
+      document.getElementById("selectAll").checked = pageRows.length > 0 && pageRows.every((student) => state.selected.has(student.id));
+    }
+    function renderPagination(pageCount) {
+      const holder = document.getElementById("pagination");
+      holder.innerHTML = "";
+      const previous = document.createElement("button");
+      previous.className = "page-btn";
+      previous.textContent = "‹";
+      previous.disabled = state.page === 1;
+      previous.setAttribute("aria-label", "Oldingi sahifa");
+      previous.addEventListener("click", () => { state.page--; render(); });
+      holder.append(previous);
+      for (let page = 1; page <= pageCount; page++) {
+        const button = document.createElement("button");
+        button.className = "page-btn" + (state.page === page ? " current" : "");
+        button.textContent = page;
+        button.addEventListener("click", () => { state.page = page; render(); });
+        holder.append(button);
+      }
+      const next = document.createElement("button");
+      next.className = "page-btn";
+      next.textContent = "›";
+      next.disabled = state.page === pageCount;
+      next.setAttribute("aria-label", "Keyingi sahifa");
+      next.addEventListener("click", () => { state.page++; render(); });
+      holder.append(next);
+    }
+    function updateSelection() {
+      const selectedBar = document.getElementById("selectedBar");
+      const count = state.selected.size;
+      selectedBar.classList.toggle("show", count > 0);
+      document.getElementById("selectedText").textContent = count + " ta talaba tanlandi";
+    }
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => toast.classList.remove("show"), 2600);
+    }
+    function openModal(title, subtitle, body, foot) {
+      document.getElementById("modalTitle").textContent = title;
+      document.getElementById("modalSubtitle").textContent = subtitle;
+      document.getElementById("modalBody").innerHTML = body;
+      document.getElementById("modalFoot").innerHTML = foot;
+      document.getElementById("modalBackdrop").classList.add("show");
+      document.getElementById("closeModal").onclick = closeModal;
+      document.getElementById("modalBackdrop").onclick = (event) => {
+        if (event.target.id === "modalBackdrop") closeModal();
+      };
+      document.onkeydown = (event) => { if (event.key === "Escape") closeModal(); };
+    }
+    function closeModal() {
+      document.getElementById("modalBackdrop").classList.remove("show");
+      document.onkeydown = null;
+    }
+    function openDetails(id) {
+      const student = students.find((item) => item.id === id);
+      if (!student) return;
+      const body =
+        '<div class="detail-list">' +
+          '<div class="detail-item"><div class="detail-label">F.I.Sh.</div><div class="detail-value">' + escapeHtml(student.name) + '</div></div>' +
+          '<div class="detail-item"><div class="detail-label">Talaba IDsi</div><div class="detail-value">' + escapeHtml(student.id) + '</div></div>' +
+          '<div class="detail-item"><div class="detail-label">Fakultet</div><div class="detail-value">' + escapeHtml(student.faculty) + '</div></div>' +
+          '<div class="detail-item"><div class="detail-label">Guruh</div><div class="detail-value">' + escapeHtml(student.group) + '</div></div>' +
+          '<div class="detail-item"><div class="detail-label">Kirish vaqti</div><div class="detail-value">' + escapeHtml(student.entry || "Qayd yo‘q") + '</div></div>' +
+          '<div class="detail-item"><div class="detail-label">Chiqish vaqti</div><div class="detail-value">' + escapeHtml(student.exit || "Qayd yo‘q") + '</div></div>' +
+        '</div>';
+      openModal("Talaba ma’lumotlari", "Reyestrdagi asosiy ma’lumotlar.", body,
+        '<button class="btn" id="detailClose">Yopish</button><button class="btn btn-primary" id="detailExport">Qaydni eksport qilish</button>');
+      document.getElementById("detailClose").onclick = closeModal;
+      document.getElementById("detailExport").onclick = () => downloadCsv([student]);
+    }
+    function openAddForm() {
+      const body =
+        '<form id="studentForm"><div class="form-grid">' +
+          '<div class="field full"><label for="fullName">Talabaning F.I.Sh.</label><input id="fullName" name="name" required placeholder="Masalan, Aziza Karimova"></div>' +
+          '<div class="field"><label for="studentId">Talaba IDsi</label><input id="studentId" name="id" required placeholder="240001"></div>' +
+          '<div class="field"><label for="studentGroup">Guruh</label><input id="studentGroup" name="group" required placeholder="AT-24-1"></div>' +
+          '<div class="field full"><label for="studentFaculty">Fakultet</label><select id="studentFaculty" name="faculty" required><option value="">Fakultetni tanlang</option>' +
+          [...new Set(students.map((student) => student.faculty))].sort().map((faculty) => '<option>' + escapeHtml(faculty) + '</option>').join("") +
+          '<option value="__new">+ Yangi fakultet kiritish</option></select></div>' +
+          '<div class="field full" id="newFacultyField" style="display:none"><label for="newFaculty">Yangi fakultet nomi</label><input id="newFaculty" placeholder="Fakultet nomi"></div>' +
+        '</div></form>';
+      const foot = '<button class="btn" id="cancelAdd">Bekor qilish</button><button class="btn btn-primary" id="saveStudent">Saqlash</button>';
+      openModal("Talaba qo‘shish", "Yangi talabani reyestrga kiriting.", body, foot);
+      document.getElementById("cancelAdd").onclick = closeModal;
+      document.getElementById("studentFaculty").addEventListener("change", (event) => {
+        document.getElementById("newFacultyField").style.display = event.target.value === "__new" ? "grid" : "none";
+      });
+      document.getElementById("saveStudent").onclick = () => {
+        const form = document.getElementById("studentForm");
+        if (!form.reportValidity()) return;
+        const formData = new FormData(form);
+        const id = String(formData.get("id")).trim();
+        if (students.some((student) => student.id === id)) {
+          document.getElementById("studentId").setCustomValidity("Bu ID reyestrda mavjud.");
+          document.getElementById("studentId").reportValidity();
+          document.getElementById("studentId").addEventListener("input", (event) => event.target.setCustomValidity(""), { once: true });
+          return;
+        }
+        let faculty = String(formData.get("faculty"));
+        if (faculty === "__new") faculty = document.getElementById("newFaculty").value.trim();
+        if (!faculty) {
+          document.getElementById("newFaculty").setCustomValidity("Fakultet nomini kiriting.");
+          document.getElementById("newFaculty").reportValidity();
+          document.getElementById("newFaculty").addEventListener("input", (event) => event.target.setCustomValidity(""), { once: true });
+          return;
+        }
+        students.unshift({ name: String(formData.get("name")).trim(), id, faculty, group: String(formData.get("group")).trim(), entry: "", exit: "", status: "absent" });
+        if (![...facultySelect.options].some((option) => option.value === faculty)) {
+          const option = document.createElement("option");
+          option.value = faculty;
+          option.textContent = faculty;
+          facultySelect.append(option);
+        }
+        state.filter = "all";
+        state.faculty = "";
+        facultySelect.value = "";
+        state.query = "";
+        document.getElementById("searchInput").value = "";
+        state.page = 1;
+        closeModal();
+        render();
+        showToast("Talaba reyestrga qo‘shildi.");
+      };
+    }
+    function csvField(value) {
+      const text = String(value ?? "");
+      const safe = /^[\s\u0000-\u001f]*[=+\-@]/.test(text) ? "'" + text : text;
+      return '"' + safe.replaceAll('"', '""') + '"';
+    }
+    function downloadCsv(rows) {
+      const headers = ["F.I.Sh.", "Talaba IDsi", "Fakultet", "Guruh", "Kirish vaqti", "Chiqish vaqti", "Holati"];
+      const records = rows.map((student) => [student.name, student.id, student.faculty, student.group, student.entry || "", student.exit || "", statusText[student.status]]);
+      const csv = "\uFEFF" + [headers, ...records].map((row) => row.map(csvField).join(";")).join("\r\n");
+      const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "talabalar-reyestri.csv";
+      link.click();
+      URL.revokeObjectURL(url);
+      closeModal();
+      showToast(rows.length + " ta yozuv CSV faylga tayyorlandi.");
+    }
+
+    const deviceConfig = { model: "", address: "", port: "8000" };
+    const instituteSettings = { name: "Oliy ta’lim muassasasi", admin: "Administrator" };
+    function pageIntro(kicker, title, description, actions) {
+      return '<div class="page-intro"><div><div class="eyebrow">' + kicker + '</div><h1>' + title + '</h1><p>' + description + '</p></div>' + (actions || "") + '</div>';
+    }
+    function metricCard(label, value, note, color) {
+      return '<div class="metric"><div><div class="metric-label">' + label + '</div><div class="metric-value">' + value + '</div><div class="metric-note">' + note + '</div></div><div class="metric-icon ' + (color || "") + '"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5 9.2 17 20 6.8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>';
+    }
+    function getEvents() {
+      return students.flatMap((student) => {
+        const events = [];
+        if (student.entry) events.push({ student, type: "Kirish", direction: "entry", time: student.entry });
+        if (student.exit) events.push({ student, type: "Chiqish", direction: "exit", time: student.exit });
+        return events;
+      }).sort((a, b) => b.time.localeCompare(a.time));
+    }
+    function renderActivity(events) {
+      if (!events.length) return '<div class="empty-state">Hozircha qaydlar yo‘q.</div>';
+      return events.map((event) =>
+        '<div class="activity-row"><div class="activity-icon ' + (event.direction === "exit" ? "exit" : "") + '">' + (event.direction === "entry" ? "↓" : "↑") + '</div><div><div class="activity-name">' + escapeHtml(event.student.name) + '</div><div class="activity-meta">' + event.type + ' · ' + escapeHtml(event.student.group) + '</div></div><div class="activity-time">' + escapeHtml(event.time) + '</div></div>'
+      ).join("");
+    }
+    function renderOverviewPage() {
+      const current = counts();
+      const arrived = current.inside + current.left;
+      const rate = current.all ? Math.round(arrived / current.all * 100) : 0;
+      const facultyNames = [...new Set(students.map((student) => student.faculty))].sort();
+      const bars = facultyNames.map((faculty) => {
+        const items = students.filter((student) => student.faculty === faculty);
+        const present = items.filter((student) => student.status !== "absent").length;
+        const percent = items.length ? Math.round(present / items.length * 100) : 0;
+        return '<div class="chart-row"><div class="chart-name">' + escapeHtml(faculty) + '</div><div class="chart-track"><div class="chart-fill" style="width:' + percent + '%"></div></div><div class="chart-value">' + percent + '%</div></div>';
+      }).join("");
+      return pageIntro("Boshqaruv paneli", "Umumiy ko‘rinish", "Institutdagi talabalar va bugungi davomat bo‘yicha qisqa ma’lumot.", '<button class="btn btn-primary" data-go="attendance">Davomat jurnalini ochish →</button>') +
+        '<div class="overview-banner"><div><h2>Bugungi davomat holati</h2><p>' + arrived + ' nafar talaba kirish qaydidan o‘tgan · ' + current.inside + ' nafari hozir institutda</p></div><div class="banner-date">' + dateString + ' · ' + rate + '% qatnashuv</div></div>' +
+        '<div class="metrics">' + metricCard("Jami talabalar", current.all, "Reyestrda", "gray") + metricCard("Bugun kelgan", arrived, "Kirish qaydi bor", "") + metricCard("Hozir institutda", current.inside, "Chiqish qaydi yo‘q", "blue") + metricCard("Kelmagan", current.absent, "Qayd topilmadi", "amber") + '</div>' +
+        '<div class="page-grid"><div class="page-card"><div class="page-card-title">Fakultetlar bo‘yicha davomat</div><div class="page-card-subtitle">Bugungi kelish qaydlari · demo ma’lumot</div><div class="chart-bars">' + bars + '</div></div>' +
+        '<div class="page-card"><div class="page-card-title">So‘nggi harakatlar</div><div class="page-card-subtitle">Kirish va chiqish qaydlari</div><div class="activity-list">' + renderActivity(getEvents().slice(0, 5)) + '</div></div></div>' +
+        '<div class="page-card"><div class="page-card-title">Tezkor bo‘limlar</div><div class="page-card-subtitle">Asosiy boshqaruv sahifalariga o‘tish</div><div class="quick-links"><button class="quick-link" data-go="students">Talabalar reyestri</button><button class="quick-link" data-go="groups">Guruhlar</button><button class="quick-link" data-go="reports">Hisobotlar</button><button class="quick-link" data-go="devices">Hikvision qurilmasi</button></div></div>' +
+        '<div class="footer-note"><span>Institut CRM · Mahalliy tarmoqdagi boshqaruv paneli</span><span>Ko‘rsatkichlar namuna ma’lumotlar asosida</span></div>';
+    }
+    function renderAttendancePage() {
+      const events = getEvents();
+      return pageIntro("Davomat nazorati", "Davomat jurnali", "Talabalarning kirish va chiqish qaydlari vaqt bo‘yicha tartiblangan.", '<button class="btn" id="exportEvents">CSV eksport</button>') +
+        '<div class="report-summary"><div class="report-number"><span>Jami qaydlar</span><strong id="eventTotal">' + events.length + '</strong></div><div class="report-number"><span>Kirish qaydlari</span><strong>' + events.filter((event) => event.direction === "entry").length + '</strong></div><div class="report-number"><span>Chiqish qaydlari</span><strong>' + events.filter((event) => event.direction === "exit").length + '</strong></div></div>' +
+        '<section class="panel"><div class="panel-heading"><div><div class="panel-title">Kirish-chiqish tarixi</div><div class="panel-subtitle">' + dateString + ' · qurilma qaydlari uchun namuna</div></div><div class="sync-note"><span class="dot"></span> Sinov rejimi</div></div>' +
+        '<div class="filter-bar"><div class="panel-subtitle" id="eventRange">Barcha qaydlar</div><div class="filters"><label class="search"><svg viewBox="0 0 24 24" fill="none"><circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.7"/><path d="m16 16 4.3 4.3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><input id="eventSearch" type="search" placeholder="Ism, ID yoki guruh..." aria-label="Qaydlarni qidirish"></label><select class="select" id="eventTypeFilter" aria-label="Qayd turi"><option value="">Kirish va chiqish</option><option value="entry">Kirish</option><option value="exit">Chiqish</option></select></div></div>' +
+        '<div class="table-wrap"><table class="compact-table"><thead><tr><th>Vaqt</th><th>Talaba</th><th>Talaba IDsi</th><th>Fakultet</th><th>Guruh</th><th>Qayd turi</th><th>Holati</th></tr></thead><tbody id="eventRows"></tbody></table></div><div class="table-footer"><div id="eventRangeBottom"></div><div>Qaydlar demo ma’lumotlardan olingan</div></div></section>' +
+        '<div class="footer-note"><span>Davomat jurnali</span><span>Hikvision terminali ulanmaguncha namuna qaydlar ko‘rsatiladi</span></div>';
+    }
+    function updateEventRows() {
+      const q = (document.getElementById("eventSearch").value || "").trim().toLocaleLowerCase("uz");
+      const direction = document.getElementById("eventTypeFilter").value;
+      const events = getEvents().filter((event) => {
+        const student = event.student;
+        const text = [student.name, student.id, student.group, student.faculty].join(" ").toLocaleLowerCase("uz");
+        return (!q || text.includes(q)) && (!direction || event.direction === direction);
+      });
+      const tbody = document.getElementById("eventRows");
+      if (!events.length) {
+        tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state">Mos qayd topilmadi.</div></td></tr>';
+      } else {
+        tbody.innerHTML = events.map((event) =>
+          '<tr><td class="time">' + escapeHtml(event.time) + '</td><td><div class="student-name">' + escapeHtml(event.student.name) + '</div><div class="student-meta">' + escapeHtml(event.student.faculty) + '</div></td><td class="id-code">' + escapeHtml(event.student.id) + '</td><td>' + escapeHtml(event.student.faculty) + '</td><td><span class="group-chip">' + escapeHtml(event.student.group) + '</span></td><td><span class="status ' + (event.direction === "entry" ? "in" : "out") + '">' + event.type + '</span></td><td>' + (event.direction === "entry" ? "Kirish qayd etildi" : "Chiqish qayd etildi") + '</td></tr>'
+        ).join("");
+      }
+      document.getElementById("eventRange").textContent = (direction === "entry" ? "Kirish qaydlari" : direction === "exit" ? "Chiqish qaydlari" : "Barcha qaydlar") + " · " + events.length + " ta";
+      document.getElementById("eventRangeBottom").textContent = events.length + " ta qayd ko‘rsatilmoqda";
+    }
+    function downloadEventsCsv(events) {
+      const rows = [["Vaqt", "F.I.Sh.", "Talaba IDsi", "Fakultet", "Guruh", "Qayd turi"], ...events.map((event) => [event.time, event.student.name, event.student.id, event.student.faculty, event.student.group, event.type])];
+      const csv = "\uFEFF" + rows.map((row) => row.map(csvField).join(";")).join("\r\n");
+      const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "davomat-jurnali.csv";
+      link.click();
+      URL.revokeObjectURL(url);
+      showToast(events.length + " ta davomat qaydi CSV faylga tayyorlandi.");
+    }
+    function renderGroupsPage() {
+      const groupNames = [...new Set(students.map((student) => student.group))].sort();
+      const cards = groupNames.map((group) => {
+        const items = students.filter((student) => student.group === group);
+        const faculty = items[0].faculty;
+        const present = items.filter((student) => student.status !== "absent").length;
+        const percent = items.length ? Math.round(present / items.length * 100) : 0;
+        return '<article class="group-card"><div class="group-card-head"><div><div class="group-name">' + escapeHtml(group) + '</div><div class="group-faculty">' + escapeHtml(faculty) + '</div></div><span class="group-count">' + items.length + ' talaba</span></div><div class="group-progress"><span style="width:' + percent + '%"></span></div><div class="group-foot"><span>Bugun kelgan</span><b>' + present + ' / ' + items.length + ' · ' + percent + '%</b></div><div class="quick-links"><button class="quick-link" data-group="' + escapeHtml(group) + '">Talabalarni ko‘rish →</button></div></article>';
+      }).join("");
+      return pageIntro("Akademik tuzilma", "Guruhlar", "Guruhlar kesimida talabalar soni va bugungi davomat.", '<button class="btn" id="groupInfoButton">Guruhlar haqida</button>') +
+        '<div class="section-toolbar"><div class="panel-subtitle">' + groupNames.length + ' ta guruh · ' + students.length + ' ta talaba namuna reyestrida</div><label class="search"><svg viewBox="0 0 24 24" fill="none"><circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.7"/><path d="m16 16 4.3 4.3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><input id="groupSearch" type="search" placeholder="Guruh yoki fakultet..." aria-label="Guruhlarni qidirish"></label></div>' +
+        '<div class="group-grid" id="groupGrid">' + cards + '</div><div class="footer-note"><span>Guruhlar ro‘yxati talabalar reyestridan yig‘iladi</span><span>Yangi guruh talaba qo‘shish oynasida kiritiladi</span></div>';
+    }
+    function bindGroupsPage() {
+      document.getElementById("groupSearch").addEventListener("input", (event) => {
+        const q = event.target.value.toLocaleLowerCase("uz");
+        document.querySelectorAll(".group-card").forEach((card) => {
+          card.style.display = card.textContent.toLocaleLowerCase("uz").includes(q) ? "" : "none";
+        });
+      });
+      document.querySelectorAll("[data-group]").forEach((button) => button.addEventListener("click", () => {
+        state.filter = "all";
+        state.faculty = "";
+        state.query = button.dataset.group;
+        state.page = 1;
+        document.getElementById("searchInput").value = state.query;
+        facultySelect.value = "";
+        document.querySelectorAll(".tab").forEach((tab) => tab.classList.toggle("active", tab.dataset.filter === "all"));
+        render();
+        showPage("students");
+      }));
+      document.getElementById("groupInfoButton").addEventListener("click", () => showToast("Guruh kartalari reyestrdagi namuna talabalardan tuzildi."));
+    }
+    function renderReportsPage() {
+      const current = counts();
+      const arrived = current.inside + current.left;
+      const rate = current.all ? Math.round(arrived / current.all * 100) : 0;
+      const facultyNames = [...new Set(students.map((student) => student.faculty))].sort();
+      const facultyRows = facultyNames.map((faculty) => {
+        const items = students.filter((student) => student.faculty === faculty);
+        const present = items.filter((student) => student.status !== "absent").length;
+        const percent = items.length ? Math.round(present / items.length * 100) : 0;
+        return '<tr><td>' + escapeHtml(faculty) + '</td><td>' + items.length + '</td><td>' + present + '</td><td>' + (items.length - present) + '</td><td><div class="chart-track"><div class="chart-fill" style="width:' + percent + '%"></div></div></td><td class="time">' + percent + '%</td></tr>';
+      }).join("");
+      const days = [{ name: "Du", value: 74 }, { name: "Se", value: 81 }, { name: "Cho", value: 68 }, { name: "Pay", value: 77 }, { name: "Ju", value: 84 }, { name: "Sha", value: 45 }, { name: "Yak", value: 0 }];
+      const bars = days.map((day) => '<div class="week-day"><b>' + (day.value ? day.value + "%" : "—") + '</b><div class="week-bar" style="height:' + Math.max(7, day.value) + '%"></div><span>' + day.name + '</span></div>').join("");
+      return pageIntro("Tahlil va eksport", "Hisobotlar", "Davomat ko‘rsatkichlarini fakultet va hafta kesimida ko‘ring.", '<button class="btn btn-primary" id="reportExport">Talabalar CSV</button>') +
+        '<div class="report-summary"><div class="report-number"><span>Umumiy qatnashuv</span><strong>' + rate + '%</strong></div><div class="report-number"><span>Kelgan talabalar</span><strong>' + arrived + ' / ' + current.all + '</strong></div><div class="report-number"><span>Kelmaganlar</span><strong>' + current.absent + '</strong></div></div>' +
+        '<div class="page-grid"><div class="page-card"><div class="page-card-title">Hafta davomida qatnashuv</div><div class="page-card-subtitle">Namuna haftalik ko‘rsatkichlar</div><div class="week-chart">' + bars + '</div></div><div class="page-card"><div class="page-card-title">Hisobot tarkibi</div><div class="page-card-subtitle">Hozирги demo reyestr asosida</div><div class="activity-list"><div class="activity-row"><div class="activity-icon">1</div><div><div class="activity-name">Jami talabalar</div><div class="activity-meta">Reyestrda</div></div><div class="activity-time">' + current.all + '</div></div><div class="activity-row"><div class="activity-icon">2</div><div><div class="activity-name">Kirish qaydlari</div><div class="activity-meta">Bugungi davomat</div></div><div class="activity-time">' + arrived + '</div></div><div class="activity-row"><div class="activity-icon exit">3</div><div><div class="activity-name">Chiqish qaydlari</div><div class="activity-meta">Tashqariga chiqqan</div></div><div class="activity-time">' + current.left + '</div></div></div></div></div>' +
+        '<section class="panel"><div class="panel-heading"><div><div class="panel-title">Fakultetlar kesimida</div><div class="panel-subtitle">Talabalar va davomat ulushi · namuna</div></div></div><div class="table-wrap"><table class="compact-table"><thead><tr><th>Fakultet</th><th>Jami</th><th>Kelgan</th><th>Kelmagan</th><th>Davomat</th><th>Foiz</th></tr></thead><tbody>' + facultyRows + '</tbody></table></div></section>' +
+        '<div class="footer-note"><span>Hisobotlar avtomatik davomat qaydlariga asoslanadi</span><span>Haqiqiy hisobot uchun Hikvision ma’lumotlari ulanadi</span></div>';
+    }
+    function renderDevicesPage() {
+      return pageIntro("Uskunalar boshqaruvi", "Qurilmalar", "Hikvision terminali va lokal tarmoq ulanish holati.", '<button class="btn" id="deviceHelp">Ulanish talablari</button>') +
+        '<div class="page-grid"><div class="device-card-large"><div class="device-main"><div class="device-illustration"><svg viewBox="0 0 24 24" fill="none"><rect x="5.5" y="2.8" width="13" height="18.4" rx="2.3" stroke="currentColor" stroke-width="1.6"/><path d="M9 6.5h6M9 17.2h6M12 10v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div><div><div class="device-heading">Hikvision Face-ID terminali</div><div class="device-description">Talabalar kirish va chiqishda IN/OUT tugmalarini bosib qayd qoldiradigan qurilma.</div><span class="device-status-pill">Ulanmagan · sinov rejimi</span></div></div><div class="device-details"><div class="device-detail"><span>Model</span><b id="deviceModelLabel">' + escapeHtml(deviceConfig.model || "Hali kiritilmagan") + '</b></div><div class="device-detail"><span>IP manzil</span><b id="deviceAddressLabel">' + escapeHtml(deviceConfig.address || "Hali kiritilmagan") + '</b></div><div class="device-detail"><span>Port</span><b id="devicePortLabel">' + escapeHtml(deviceConfig.port) + '</b></div><div class="device-detail"><span>Ma’lumot yo‘li</span><b>Lokal tarmoq · API keyin ulanadi</b></div></div></div>' +
+        '<div class="page-card"><div class="page-card-title">Ulanish holati</div><div class="page-card-subtitle">Hozircha faol terminal aniqlanmadi</div><div class="activity-list"><div class="activity-row"><div class="activity-icon exit">!</div><div><div class="activity-name">Terminal ulanmagan</div><div class="activity-meta">Hozircha qurilma mavjud emas</div></div></div><div class="activity-row"><div class="activity-icon">i</div><div><div class="activity-name">Shaxslar bazasi</div><div class="activity-meta">Talabalar yuzlari qurilmaga keyin kiritiladi</div></div></div><div class="activity-row"><div class="activity-icon">↔</div><div><div class="activity-name">IN / OUT hodisalari</div><div class="activity-meta">Ulanishdan keyin jurnalga keladi</div></div></div></div></div></div>' +
+        '<div class="page-grid equal"><div class="page-card"><div class="page-card-title">Qurilma sozlamalari</div><div class="page-card-subtitle">Ma’lumotlarni hozirdan kiritish mumkin.</div><div class="settings-form" style="margin-top:14px"><div class="field"><label for="deviceModel">Qurilma modeli</label><input id="deviceModel" placeholder="Masalan, DS-K1T..." value="' + escapeHtml(deviceConfig.model) + '"></div><div class="field"><label for="deviceAddress">Lokal IP manzil</label><input id="deviceAddress" placeholder="192.168.1.100" value="' + escapeHtml(deviceConfig.address) + '"></div><div class="field"><label for="devicePort">Port</label><input id="devicePort" inputmode="numeric" value="' + escapeHtml(deviceConfig.port) + '"></div><div class="head-actions"><button class="btn" id="testDevice">Ulanishni tekshirish</button><button class="btn btn-primary" id="saveDevice">Saqlash</button></div></div></div><div class="page-card"><div class="page-card-title">Ulanish uchun kerak bo‘ladi</div><div class="activity-list"><div class="setting-row"><div><strong>Hikvision model raqami</strong><small>Qurilma yorlig‘idan olinadi</small></div></div><div class="setting-row"><div><strong>Lokal IP va port</strong><small>Institut tarmog‘idagi manzil</small></div></div><div class="setting-row"><div><strong>Hodisa API ruxsati</strong><small>IN/OUT qaydlarini o‘qish uchun</small></div></div></div><div class="page-empty-note">my.gov.uz va Face-ID bilan bog‘liq integratsiya ruxsat olinganidan keyingi bosqichda qo‘shiladi.</div></div></div>' +
+        '<div class="footer-note"><span>Qurilma holati demo ko‘rinishda</span><span>Ulanish sozlamalari bu prototipda faqat joriy sessiyada saqlanadi</span></div>';
+    }
+    function renderSettingsPage() {
+      return pageIntro("Tizim boshqaruvi", "Sozlamalar", "Institut, administrator va mahalliy tizim sozlamalari.", '<button class="btn btn-primary" id="saveSettings">O‘zgarishlarni saqlash</button>') +
+        '<div class="settings-grid"><div class="page-card"><div class="page-card-title">Institut ma’lumotlari</div><div class="page-card-subtitle">CRM bosh sahifasida ko‘rinadigan ma’lumotlar.</div><div class="settings-form" style="margin-top:15px"><div class="field"><label for="instituteName">Oliy ta’lim muassasasi</label><input id="instituteName" value="' + escapeHtml(instituteSettings.name) + '"></div><div class="field"><label for="adminName">Administrator nomi</label><input id="adminName" value="' + escapeHtml(instituteSettings.admin) + '"></div><div class="field"><label for="timezone">Vaqt mintaqasi</label><select id="timezone"><option value="Asia/Tashkent">Toshkent · UTC+5</option></select></div><div class="field"><label for="language">Interfeys tili</label><select id="language"><option>O‘zbekcha</option></select></div></div></div>' +
+        '<div class="page-card"><div class="page-card-title">Bildirishnomalar</div><div class="page-card-subtitle">Administrator panelidagi xabarlar.</div><div class="activity-list"><div class="setting-row"><div><strong>Qurilma aloqasi uzilganda</strong><small>Terminal holati haqida xabar</small></div><label class="switch"><input type="checkbox" checked><span></span></label></div><div class="setting-row"><div><strong>Yangi davomat qaydlari</strong><small>IN/OUT hodisalari kelganda</small></div><label class="switch"><input type="checkbox" checked><span></span></label></div><div class="setting-row"><div><strong>Kunlik davomat xulosasi</strong><small>Kun yakunida qisqa hisobot</small></div><label class="switch"><input type="checkbox"><span></span></label></div></div><div class="page-empty-note">Sozlamalar hozircha brauzer sessiyasi davomida amal qiladi.</div></div></div>' +
+        '<div class="page-card" style="margin-top:14px"><div class="page-card-title">Maxfiylik va integratsiya</div><div class="page-card-subtitle">Demo versiyada haqiqiy talaba biometrik ma’lumotlari ishlatilmaydi.</div><div class="quick-links"><span class="quick-link">Mahalliy tarmoq</span><span class="quick-link">Demo ma’lumotlar</span><span class="quick-link">my.gov.uz · ruxsatdan keyin</span></div></div>' +
+        '<div class="footer-note"><span>Sozlamalar saqlanishi keyingi serverli bosqichda doimiy qilinadi</span><span>Hozircha tashqi tizimlarga ma’lumot yuborilmaydi</span></div>';
+    }
+    function showPage(page) {
+      const items = [...document.querySelectorAll(".nav-item")];
+      const navItem = items.find((item) => item.dataset.page === page);
+      if (!navItem) return;
+      items.forEach((item) => item.classList.toggle("active", item === navItem));
+      document.querySelector(".crumb strong").textContent = navItem.dataset.section;
+      document.title = "Institut CRM — " + navItem.dataset.section;
+      const studentsPage = document.getElementById("studentsContent");
+      const otherPages = document.getElementById("otherPages");
+      studentsPage.style.display = page === "students" ? "" : "none";
+      otherPages.style.display = page === "students" ? "none" : "block";
+      if (page !== "students") {
+        const renderers = { overview: renderOverviewPage, attendance: renderAttendancePage, groups: renderGroupsPage, reports: renderReportsPage, devices: renderDevicesPage, settings: renderSettingsPage };
+        otherPages.innerHTML = renderers[page]();
+        bindPage(page);
+      }
+      if (innerWidth <= 760) document.getElementById("sidebar").classList.remove("open");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+    function bindPage(page) {
+      document.querySelectorAll("[data-go]").forEach((button) => button.addEventListener("click", () => showPage(button.dataset.go)));
+      if (page === "attendance") {
+        updateEventRows();
+        document.getElementById("eventSearch").addEventListener("input", updateEventRows);
+        document.getElementById("eventTypeFilter").addEventListener("change", updateEventRows);
+        document.getElementById("exportEvents").addEventListener("click", () => {
+          const q = document.getElementById("eventSearch").value.trim().toLocaleLowerCase("uz");
+          const direction = document.getElementById("eventTypeFilter").value;
+          const events = getEvents().filter((event) => {
+            const text = [event.student.name, event.student.id, event.student.faculty, event.student.group].join(" ").toLocaleLowerCase("uz");
+            return (!q || text.includes(q)) && (!direction || event.direction === direction);
+          });
+          downloadEventsCsv(events);
+        });
+      }
+      if (page === "groups") bindGroupsPage();
+      if (page === "reports") document.getElementById("reportExport").addEventListener("click", () => downloadCsv(students));
+      if (page === "devices") {
+        document.getElementById("deviceHelp").addEventListener("click", () => showToast("Hikvision modeli, lokal IP manzili va hodisa API ruxsati kerak bo‘ladi."));
+        document.getElementById("saveDevice").addEventListener("click", () => {
+          deviceConfig.model = document.getElementById("deviceModel").value.trim();
+          deviceConfig.address = document.getElementById("deviceAddress").value.trim();
+          deviceConfig.port = document.getElementById("devicePort").value.trim() || "8000";
+          document.getElementById("deviceModelLabel").textContent = deviceConfig.model || "Hali kiritilmagan";
+          document.getElementById("deviceAddressLabel").textContent = deviceConfig.address || "Hali kiritilmagan";
+          document.getElementById("devicePortLabel").textContent = deviceConfig.port;
+          showToast("Qurilma ma’lumotlari joriy sessiyaga saqlandi.");
+        });
+        document.getElementById("testDevice").addEventListener("click", () => {
+          showToast("Demo rejimi: haqiqiy qurilmaga ulanish hali faollashtirilmagan.");
+        });
+      }
+      if (page === "settings") {
+        document.getElementById("saveSettings").addEventListener("click", () => {
+          instituteSettings.name = document.getElementById("instituteName").value.trim() || instituteSettings.name;
+          instituteSettings.admin = document.getElementById("adminName").value.trim() || instituteSettings.admin;
+          showToast("Sozlamalar joriy sessiyaga saqlandi.");
+        });
+      }
+    }
+
+    document.querySelectorAll(".tab").forEach((tab) => tab.addEventListener("click", () => {
+      document.querySelectorAll(".tab").forEach((item) => item.classList.remove("active"));
+      tab.classList.add("active");
+      state.filter = tab.dataset.filter;
+      state.page = 1;
+      render();
+    }));
+    document.getElementById("searchInput").addEventListener("input", (event) => {
+      state.query = event.target.value;
+      state.page = 1;
+      render();
+    });
+    facultySelect.addEventListener("change", (event) => {
+      state.faculty = event.target.value;
+      state.page = 1;
+      render();
+    });
+    document.querySelectorAll("th[data-sort]").forEach((heading) => heading.addEventListener("click", () => {
+      const key = heading.dataset.sort;
+      state.direction = state.sort === key ? state.direction * -1 : 1;
+      state.sort = key;
+      render();
+    }));
+    document.getElementById("selectAll").addEventListener("change", (event) => {
+      const rows = getFiltered().slice((state.page - 1) * state.pageSize, state.page * state.pageSize);
+      rows.forEach((student) => event.target.checked ? state.selected.add(student.id) : state.selected.delete(student.id));
+      render();
+    });
+    document.getElementById("clearSelection").addEventListener("click", () => { state.selected.clear(); render(); });
+    document.getElementById("exportSelected").addEventListener("click", () => downloadCsv(students.filter((student) => state.selected.has(student.id))));
+    document.getElementById("exportButton").addEventListener("click", () => downloadCsv(getFiltered()));
+    document.getElementById("addButton").addEventListener("click", openAddForm);
+    document.getElementById("helpButton").addEventListener("click", () => showToast("Talabani topish uchun ism, ID yoki guruh bo‘yicha qidiring."));
+    document.getElementById("notificationButton").addEventListener("click", () => showToast("Yangi bildirishnomalar yo‘q."));
+    document.getElementById("menuToggle").addEventListener("click", () => document.getElementById("sidebar").classList.toggle("open"));
+    document.querySelectorAll(".nav-item").forEach((item) => item.addEventListener("click", () => showPage(item.dataset.page)));
+    document.getElementById("closeModal").addEventListener("click", closeModal);
+    render();
+  </script>
+</body>
+</html>
