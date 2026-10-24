@@ -302,7 +302,7 @@ function startAiWorker() {
   });
 }
 
-function analyzeFace(imageDataUrl) {
+function analyzeFace(imageDataUrl, op = 'analyze') {
   if (!aiReady || !aiWorker) return Promise.reject(Object.assign(new Error('YOLO xizmati tayyor emas. Serverda setup-ai.ps1 ni ishga tushiring.'), { status: 503 }));
   const requestId = String(++aiRequestId);
   return new Promise((resolve, reject) => {
@@ -311,7 +311,7 @@ function analyzeFace(imageDataUrl) {
       reject(Object.assign(new Error('Yuzni aniqlash vaqti tugadi. Qayta urinib ko‘ring.'), { status: 504 }));
     }, 20000);
     aiPending.set(requestId, { resolve, reject, timeout });
-    aiWorker.stdin.write(`${JSON.stringify({ id: requestId, imageDataUrl })}\n`, error => {
+    aiWorker.stdin.write(`${JSON.stringify({ id: requestId, op, imageDataUrl })}\n`, error => {
       if (error) {
         clearTimeout(timeout);
         aiPending.delete(requestId);
@@ -511,6 +511,12 @@ const app = async (req, res) => {
         if (d.direction === 'entry') return fail(res, 403, 'Bu terminal faqat kirish uchun sozlangan.');
         return send(res, 200, { visits: activeVisits() });
       }
+      if (req.method === 'POST' && p === '/api/device/face-detect') {
+        const b = await body(req);
+        const detection = await analyzeFace(b.imageDataUrl, 'detect');
+        if (!detection.ok) return fail(res, 422, detection.error);
+        return send(res, 200, { faces: detection.faces });
+      }
       if (req.method === 'POST' && p === '/api/device/face-match') {
         const b = await body(req), mode = clean(b.mode, 20);
         if (!['employee-check', 'entry', 'exit'].includes(mode)) return fail(res, 400, 'Yuz tekshiruvi rejimini tanlang.');
@@ -518,7 +524,8 @@ const app = async (req, res) => {
         if (mode === 'exit' && d.direction === 'entry') return fail(res, 403, 'Bu terminal faqat kirish uchun sozlangan.');
         if (mode === 'entry') {
           const employeeCount = q.employees.all().length, templateCount = q.employeeTemplates.all().length;
-          if (!employeeCount || templateCount !== employeeCount) return send(res, 200, { type: 'employee_setup_incomplete', error: 'Tashrifchi suratga olinmasidan oldin administrator barcha xodimlarning yuz shablonini kiritishi kerak.' });
+          // Only a registered employee without a face template could be mistaken for a visitor.
+          if (templateCount !== employeeCount) return send(res, 200, { type: 'employee_setup_incomplete', error: 'Tashrifchi suratga olinmasidan oldin administrator barcha xodimlarning yuz shablonini kiritishi kerak.' });
         }
         const analysis = await analyzeFace(b.imageDataUrl);
         if (!analysis.ok) return fail(res, 422, analysis.error);
@@ -555,8 +562,9 @@ const app = async (req, res) => {
       }
       if (req.method === 'POST' && p === '/api/device/entry') {
         if (d.direction === 'exit') return fail(res, 403, 'Bu terminal faqat chiqish uchun sozlangan.');
-        const b = await body(req), name = clean(b.name, 120), purpose = clean(b.purpose, 200) || 'Tashrif';
-        if (!name) return fail(res, 400, 'F.I.Sh.ini kiriting.');
+        const b = await body(req), purpose = clean(b.purpose, 200) || 'Tashrif';
+        // The kiosk terminal no longer asks for a name; the photo and arrival time identify the visitor.
+        const name = clean(b.name, 120) || `Tashrifchi (${new Intl.DateTimeFormat('uz-UZ', { hour: '2-digit', minute: '2-digit' }).format(new Date())})`;
         if (!b.photoDataUrl) return fail(res, 400, 'Tashrifchi suratini oling.');
         if (aiReady && !b.faceTicket) return fail(res, 400, 'Kirishdan oldin yuzni YOLO orqali tekshiring.');
         const embedding = b.faceTicket ? consumeFaceTicket(b.faceTicket, d.id, b.photoDataUrl) : null;

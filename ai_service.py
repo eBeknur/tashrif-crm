@@ -22,6 +22,8 @@ JPEG_SOF_MARKERS = {0xC0, 0xC1, 0xC2, 0xC3, 0xC5, 0xC6, 0xC7, 0xC9, 0xCA, 0xCB, 
 # A tablet camera has no depth sensor, so face size and a center zone are
 # used as a practical proxy for selecting the closest person.
 FACE_CENTER_RADIUS = float(os.environ.get("TASHRIF_FACE_CENTER_RADIUS", "0.62"))
+# Max nose offset from the eye midpoint (in eye distances) still counted as looking at the camera.
+FRONTAL_MAX_YAW = float(os.environ.get("TASHRIF_FRONTAL_MAX_YAW", "0.35"))
 
 
 def load_models():
@@ -199,6 +201,43 @@ def analyze(data_url, models):
     }
 
 
+def frontal_yaw(face):
+    """Horizontal nose offset from the eye midpoint, in inter-eye distances (0 = looking straight)."""
+    right_eye_x, left_eye_x, nose_x = float(face[4]), float(face[6]), float(face[8])
+    eye_distance = abs(left_eye_x - right_eye_x)
+    if eye_distance < 1.0:
+        return None
+    return (nose_x - (right_eye_x + left_eye_x) / 2.0) / eye_distance
+
+
+def detect(data_url, models):
+    """Fast presence check for the auto-capture terminal: no embedding, nothing stored."""
+    detector, landmarks, _ = models
+    image = decode_image(data_url)
+    height, width = image.shape[:2]
+    yolo_faces = detect_yolo(detector, image)
+    if not yolo_faces:
+        return {"ok": True, "faces": []}
+    landmarks.setInputSize((width, height))
+    _, landmark_faces = landmarks.detect(image)
+    result = []
+    for yolo_face in yolo_faces:
+        x1, y1, x2, y2 = yolo_face["box"]
+        yaw = None
+        if landmark_faces is not None and len(landmark_faces):
+            overlap, face = max(((iou(yolo_face["box"], [f[0], f[1], f[0] + f[2], f[1] + f[3]]), f) for f in landmark_faces), key=lambda item: item[0])
+            if overlap >= 0.2:
+                yaw = frontal_yaw(face)
+        result.append({
+            "box": [round(x1 / width, 4), round(y1 / height, 4), round(x2 / width, 4), round(y2 / height, 4)],
+            "confidence": round(float(yolo_face["confidence"]), 4),
+            # YuNet only finds landmarks on a face turned toward the camera; a missing
+            # match or a large nose offset means the person is looking away.
+            "frontal": yaw is not None and abs(yaw) <= FRONTAL_MAX_YAW,
+        })
+    return {"ok": True, "faces": result}
+
+
 def main():
     try:
         models = load_models()
@@ -209,7 +248,8 @@ def main():
     for line in sys.stdin:
         try:
             request = json.loads(line)
-            result = analyze(request.get("imageDataUrl"), models)
+            handler = detect if request.get("op") == "detect" else analyze
+            result = handler(request.get("imageDataUrl"), models)
             result["id"] = request.get("id")
             print(json.dumps(result, ensure_ascii=False), flush=True)
         except Exception as error:
